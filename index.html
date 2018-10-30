@@ -22,11 +22,27 @@
              width: 640px;
              height: 400px;
         }
+        #menu {
+           position: absolute;
+           background: #fff;
+           padding: 10px;
+           font-family: 'Open Sans', sans-serif;
+        }
     </style>
 </head>
 <body>
 <div id='app' class='col12 contain clip'>
 <div id='map'></div>
+<div id='menu'>
+    <input id='light' type='radio' name='rtoggle' value='light' checked='checked'>
+    <label for='light'>light</label>
+    <input id='basic' type='radio' name='rtoggle' value='basic' >
+    <label for='basic'>basic</label>
+    <input id='dark' type='radio' name='rtoggle' value='dark'>
+    <label for='dark'>dark</label>
+    <input id='satellite' type='radio' name='rtoggle' value='satellite'>
+    <label for='satellite'>satellite</label>
+</div>
 <div class='col4 pad1  scroll-styled pin-topright  '>
   <div id='legendbtn' class='fill-darken2 pad1 icon book button fr' onclick="$('#legendbtn').toggle();$('#legend').toggle()"></div>
   <div id='legend' class='fill-lighten3 hidden round'>
@@ -56,17 +72,33 @@ var Layers = [
     ];
 
 
-  mapboxgl.accessToken = 'pk.eyJ1IjoiYmlrZW90dGF3YSIsImEiOiJjamdqaWxrN3gwZXQ4MnFxbjAwZXRpbG8zIn0.XhAdk2ASwdipubccCWTfoQ';
-  var map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/light-v9',
-    center: [-75.697927,45.417431],
-    zoom: 13,
-    minZoom: 10,
-    maxZoom: 20,
-    maxBounds: [[-76.385193,44.963826],[-75.011902,45.614998]],
-    attributionControl: false
+mapboxgl.accessToken = 'pk.eyJ1IjoiYmlrZW90dGF3YSIsImEiOiJjamdqaWxrN3gwZXQ4MnFxbjAwZXRpbG8zIn0.XhAdk2ASwdipubccCWTfoQ';
+var map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/light-v9',
+  center: [-75.697927,45.417431],
+  zoom: 13,
+  minZoom: 10,
+  maxZoom: 20,
+  maxBounds: [[-76.385193,44.963826],[-75.011902,45.614998]],
+  attributionControl: false
 });
+
+map.addControl(new mapboxgl.NavigationControl(),'bottom-right');
+map.addControl(new mapboxgl.ScaleControl(), 'bottom-left');
+map.addControl(new mapboxgl.AttributionControl({compact: true }), 'bottom-right');
+
+var layerList = document.getElementById('menu');
+var inputs = layerList.getElementsByTagName('input');
+
+function switchLayer(layer) {
+    var layerId = layer.target.id;
+    map.setStyle('mapbox://styles/mapbox/' + layerId + '-v9');
+}
+
+for (var i = 0; i < inputs.length; i++) {
+    inputs[i].onclick = switchLayer;
+}
 
 function init() {
 
@@ -127,12 +159,10 @@ function toggleLayer (checkbox) {
   }
 
 
-map.once('style.load', function () {
+map.on('style.load', function () {
 
     init()
-    map.addControl(new mapboxgl.NavigationControl(),'bottom-right');
-    map.addControl(new mapboxgl.ScaleControl(), 'bottom-left');
-    map.addControl(new mapboxgl.AttributionControl({compact: true }), 'bottom-right');
+
 });
 
 map.on('click', function(e) {
@@ -163,7 +193,7 @@ map.on('load', function(e) {
               });
       map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
   });
-  
+
   addDateToAttribution()
   document.getElementById("loader").style.visibility = "hidden";
   //url = new URLSearchParams(window.location.href)
@@ -215,7 +245,7 @@ function displayFeedbackPopup(lngLat){
   popup+='"><img class="enlarge-onhover" src="https://maps.googleapis.com/maps/api/streetview?size=640x400&fov=120&pitch=-30&key=AIzaSyDXbZYWFjz5Nr8N1c0OoTA_YFYCyV0V6Fs&location='+lngLat.lat+','+lngLat.lng+'"></a></div></li>'
   popup+='</ul><hr><div id="clickme" class="quiet text-left small">Suggest a new path</div>';
   popup+='<div id="fform" class=""><form id="feedback"><p><textarea id="comment" name="comment" class="small" style="padding:3px"></textarea></p>';
-  popup+='<input type="hidden" name="link" value="https://maps.bikeottawa.ca/desire/?&lat='+lngLat.lat+'&lng='+lngLat.lng + '">';
+  popup+='<input type="hidden" name="link" value="https://zzptichka.github.io/ottgreen/?&lat='+lngLat.lat+'&lng='+lngLat.lng + '">';
   popup+='<p id="result"></p><input type="submit" value="Submit" /></form></div>';
 
   const pop = new mapboxgl.Popup()
@@ -233,7 +263,7 @@ function displayFeedbackPopup(lngLat){
     $inputs.prop("disabled", true);
     $('#result').text('Sending ...');
     request = $.ajax({
-      url: "https://script.google.com/macros/s/AKfycbya64PfAcZ36ia3dJpleAxokuPRFPa9X-3j9nR1M2mZgBdRx94y/exec",
+      url: "https://script.google.com/macros/s/AKfycbwekShTJlFROtHCI4BEUQu9ACT00fP_Ftb8vOaUgEUYkxmiJVE/exec",
       type: "post",
       data: serializedData
     });
@@ -311,6 +341,6 @@ function showMapillaryImage(lngLat) {
   xhr.send()
 }
 </script>
-<!--https://docs.google.com/spreadsheets/d/1Rx1SjhWXwkMsHFAioP9XE42Or9S7Ob7JYPLUzSMe-T8/edit?usp=sharing -->
+<!--https://docs.google.com/spreadsheet/ccc?key=1Qhw9wpej6xaeo6ELbW8GxBwOhvgLPLvyIIByj-re6J4/edit?usp=sharing -->
 </body>
 </html>
