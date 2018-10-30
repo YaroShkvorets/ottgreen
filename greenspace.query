@@ -1,0 +1,7 @@
+[out:xml][timeout:100];
+{{geocodeArea:Ottawa}}->.searchArea;
+(
+way["leisure"="park"](area.searchArea);
+);
+(._;>;);
+out meta;
