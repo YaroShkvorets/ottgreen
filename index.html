@@ -237,7 +237,11 @@ function addDateToAttribution(){
   request.send()
 }
 
+let feedbackPopup;
+
 function displayFeedbackPopup(lngLat){
+  if (feedbackPopup && feedbackPopup.isOpen()) feedbackPopup.remove();
+
   let popup = '<ul>';
   showMapillaryImage(lngLat)
   popup+='<li><div id="showMapillary"></div></li>'
@@ -248,7 +252,7 @@ function displayFeedbackPopup(lngLat){
   popup+='<input type="hidden" name="link" value="https://zzptichka.github.io/ottgreen/?&lat='+lngLat.lat+'&lng='+lngLat.lng + '">';
   popup+='<p id="result"></p><input type="submit" value="Submit" /></form></div>';
 
-  const pop = new mapboxgl.Popup()
+  feedbackPopup = new mapboxgl.Popup()
   .setLngLat(lngLat)
   .setHTML(popup)
   .addTo(map);
@@ -280,6 +284,8 @@ function displayFeedbackPopup(lngLat){
 }
 
 function displayFeatureInfo(feature, lngLat) {
+  if (feedbackPopup && feedbackPopup.isOpen()) feedbackPopup.remove();
+
   let popup = '<h4>'+(typeof(feature.properties.name)==='undefined'?'Unknown park':feature.properties.name)+'</h4><hr><ul>'
   Object.keys(feature.properties).forEach(key => popup+=`<li>${key}: <b>${feature.properties[key]}</b></li>\n`);
 
@@ -292,7 +298,7 @@ function displayFeatureInfo(feature, lngLat) {
   popup+='<input type="hidden" name="link" value="' + window.location.href + '">';
   popup+='<p id="result"></p><input type="submit" value="Submit" /></form></div>';
 
-  var pop = new mapboxgl.Popup()
+  feedbackPopup = new mapboxgl.Popup()
   .setLngLat(lngLat)
   .setHTML(popup)
   .addTo(map)
