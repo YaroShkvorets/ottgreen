@@ -1,7 +1,6 @@
-[out:xml][timeout:100];
-{{geocodeArea:Ottawa}}->.searchArea;
+[out:xml][timeout:20];
 (
-way["leisure"="park"](area.searchArea);
+  nwr(area:3604136816)["leisure"="park"];
+  node(w);
 );
-(._;>;);
-out meta;
+out;
