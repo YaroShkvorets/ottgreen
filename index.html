@@ -8,6 +8,9 @@ Parks<!DOCTYPE html>
     <script  data-cfasync="false" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.css' rel='stylesheet' />
     <link href='https://www.mapbox.com/base/latest/base.css' rel='stylesheet' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.2.0/mapbox-gl-geocoder.min.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.2.0/mapbox-gl-geocoder.css' type='text/css' />
+
     <style>
         body { margin:0; padding:0; }
         #app { position:absolute; top:0; right:0; bottom:0; left:0; }
@@ -48,7 +51,6 @@ Parks<!DOCTYPE html>
   <div id='legendbtn' class='fill-darken2 pad1 icon book button hidden fr' onclick="$('#legendbtn').toggle();$('#legend').toggle()"></div>
   <div id='legend' class='fill-lighten3 round'>
     <div id='closebtn' class='fill-darken2 pad1 icon close button fr' onclick="$('#legendbtn').toggle();$('#legend').toggle()"></div>
-    <div class='clearfix'></div>
     <div class='pad1'>
       <h3>Ottawa Greenspace</h3><hr>
         <div class='small'>
@@ -56,8 +58,9 @@ Parks<!DOCTYPE html>
         <p>Right now only areas tagged as parks are shown here. If you see areas that are not supposed to be here - click on that area, describe the problem, i.e. "This is not a greenspace. Please remove", and submit.</p>
         <p>If you see that some greenspace is missing - click on a map, describe what needs to be added, i.e. "There is a wood here that should be considered greenspace", and submit!</p>
         <p>We'll review the submissions and make appropriate changes soon after.</p>
+        <p class='fr'>Data as of: <span id='dateUpdated'>[updating...]</span></p>
         <div class='center'><img src="https://d1cuyjsrcm0gby.cloudfront.net/I_zRog72zCi7fgGG8e_Asw/thumb-320.jpg"></div>
-        <div class='center pad2'>
+        <div class='center pad1'>
       	<a href='https://github.com/zzptichka/OttGreen'><img src="https://maps.bikeottawa.ca/img/logos/github.png" style="width:32px; height:32px;"></a>
         <a href='https://twitter.com/zzptichka'><img src="https://maps.bikeottawa.ca/img/logos/twitter.png" style="width:32px; height:32px;"></a>
         </div>
@@ -85,9 +88,17 @@ var map = new mapboxgl.Map({
   attributionControl: false
 });
 
-map.addControl(new mapboxgl.NavigationControl(),'bottom-right');
 map.addControl(new mapboxgl.ScaleControl(), 'bottom-left');
+map.addControl(new mapboxgl.NavigationControl(),'bottom-left');
 map.addControl(new mapboxgl.AttributionControl({compact: true }), 'bottom-right');
+const geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        bbox: [-76.385193,44.963826,-75.011902,45.614998],
+        zoom: 13,
+        limit: 10
+    })
+
+map.addControl(geocoder, 'bottom-right')
 
 var layerList = document.getElementById('menu');
 var inputs = layerList.getElementsByTagName('input');
@@ -195,7 +206,7 @@ map.on('load', function(e) {
       map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
   });
 
-  addDateToAttribution()
+  addUpdatedDate()
   document.getElementById("loader").style.visibility = "hidden";
   //url = new URLSearchParams(window.location.href)
   url = (function(a) {    //workaround for edge that doesn't support URLSearchParams
@@ -223,7 +234,7 @@ map.on('load', function(e) {
 
 })
 
-function addDateToAttribution(){
+function addUpdatedDate(){
   const request = new XMLHttpRequest()
   request.open('GET','https://api.mapbox.com/tilesets/v1/bikeottawa?access_token=sk.eyJ1IjoiYmlrZW90dGF3YSIsImEiOiJjamdyYTJmN2EwMmtoMzJwc3JxM2hoZ3ozIn0.YB1JNmncsPvktmgGU_zK8A')
   request.onload = function () {
@@ -231,7 +242,7 @@ function addDateToAttribution(){
       var data = JSON.parse(request.responseText);
       if(data && data instanceof Array){
         const date = new Date(data.find(x => x.id === 'bikeottawa.d6lkrloq').modified)
-        document.querySelector('.mapboxgl-ctrl-attrib').innerHTML = '<a href="https://bikeottawa.ca">© BikeOttawa</a> <a href="https://www.mapbox.com/about/maps/" target="_blank">© Mapbox</a> <a href="http://www.openstreetmap.org/about/" target="_blank">© OpenStreetMap</a>'+' ['+date.toLocaleString()+']';
+        document.getElementById('dateUpdated').innerHTML = date.toLocaleString();
       }
     }
   }
